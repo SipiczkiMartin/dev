@@ -1,0 +1,33 @@
+SELECT model 
+FROM cars 
+WHERE color = 'blue' //we can use AND OR with where
+  AND year > 2014
+  LIKE -> use with where to match patterns
+  LIKE '%' -> wildcard with like to match 0 or more characters  'The %' all that begins with The
+  LIKE '_ove' -> wildcard to replace character in word this can return love,dove,rove ...
+  
+  SELECT name AS name -> alias
+  
+  ORDER BY something DESC/ASC !! goes after where !! orders by given collumn 
+  
+  SELECT DISTINCT name -> unique values for collumns(every name only ones)
+  
+  WHERE BETWEEN 1980 AND 1988 -> return something between values but not including second value !! applicable for characters as well 'A' AND 'F'
+  
+  LIMIT 5 ->use last limit or narrow the result set to 5 here...
+  
+  AGGREGATES :
+  COUNT()
+  SELECT COUNT(column) from table -> returns the count of non empty values in that column
+  SUM()
+  SELECT SUM(column) from table -> return sum of all values in that column
+  MAX/MIN
+  SELECT MAX(column) -> returns highest or lowest value from column
+  AVG
+  SELECT AVG(column) -> returns average value of that column
+  GROUP BY
+  SELECT * from table WHERE something GROUP BY column -> groups by values comes after where clause but befor ORDER BY and LIMIT
+     we can use column references in group and order by clauses -> select SUM(column),COUNT(column) from table group by 1 order by 1 -> first value in select
+  HAVING
+  -> used to filter groups not rows like WHERE, comes after group by but before order by and limit
+  
