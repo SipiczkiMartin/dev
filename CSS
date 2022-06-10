@@ -1,0 +1,22 @@
+CSS should go into style element in head section or in a .css file that is linked <link rel="stylesheet" type="text/css" href="styles.css"> in html head 
+
+element,element2,...{
+  property: value;
+} 
+ something like h1{
+                  text-align: center;
+                }
+                
+comment /* */
+
+class selector:
+.class-name{  /*starts with a dot.*/
+    same as before
+   }
+
+image from url...
+background-image: url(https://cdn.freecodecamp.org/curriculum/css-cafe/beans.jpg)
+
+.item p{ //access all nested ps in class item
+    display: inline-block; // p will be inline not block
+}
