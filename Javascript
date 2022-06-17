@@ -16,3 +16,28 @@ function functionName(){
 
 == -> convert then compare
 === -> strinct compare, no type conversion
+
+objects
+const objectName = {
+  property1: "prop",
+  property2: 2;
+};
+
+accessing objectName.property1 or objectName["property2"] both do the same but if property has a space in the name have to use brackets
+adding properties -> objectName.property3 = "prop3";
+removing properties -> delete objectName.property3;
+objectName.hasOwnProperty(propertyName) -> returns true/false depending if objectName has the property or not
+
+data structures
+const structure = [
+optionalName:{
+  object with properties 1,
+  [ array in object
+  ]
+ },
+ {
+ object with properties 2
+ }
+];   -> it behaves as JSON accessing with chaining dots and names an so on..
+
+for and while loops as in java...
