@@ -41,3 +41,12 @@ optionalName:{
 ];   -> it behaves as JSON accessing with chaining dots and names an so on..
 
 for and while loops as in java...
+
+to prevent an object from being changed use Object.freeze(name of object); -> muss declare the object first....
+arrow notacion for declaring inline functions  const name = () => { do something... return something }; 
+when we only return someting so the fucntion doesn't have a body we can ommit the brackets const name = () => "value" ; this will return the value by default
+pass arguments in bracket const name = (argument1, arg2) => {do something...}; if only one argument the brackets can be ommited !!
+arguments can have default values const name = (argument1 = defaultVal) => {}; this will be used when function called without that parameter...
+REST operator const name = (...someName) => {we can use filter reduce...}; and can pass as big of an array as we want to
+DESTRUCTURING ASSIGNMENT --> obj = { name, age}; we can use const {name,age} = obj; to assign the values to the variables
+with nested objects we declare which object we're using --> const {obj: {var1,var2}} = superObj; 
