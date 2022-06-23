@@ -1,0 +1,6 @@
+in javascript don't know if they're the same everywhere... maybe I'm being stupid here :-D
+/word/ -> regex to find word in string
+/word|Word/ -> used | OR
+/word/i -> used i for ignore case this finds word in any case
+/b.n/ -> wildcard . would find bun bon ban ...
+/[aei]/ -> character classes fing only a e i in the string /m[aoe]m/ would find mam mom mem
