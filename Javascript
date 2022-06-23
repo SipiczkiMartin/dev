@@ -50,3 +50,22 @@ arguments can have default values const name = (argument1 = defaultVal) => {}; t
 REST operator const name = (...someName) => {we can use filter reduce...}; and can pass as big of an array as we want to
 DESTRUCTURING ASSIGNMENT --> obj = { name, age}; we can use const {name,age} = obj; to assign the values to the variables
 with nested objects we declare which object we're using --> const {obj: {var1,var2}} = superObj; 
+
+ES6:
+class ClassName{
+  constructor(var,var2...){
+    do something in constructor;
+   }
+   
+   set var (var){
+    this.var = var;
+   }
+   
+   get var(){
+    return this.var;
+   }
+}
+
+call the setters and getters like var in the class  ClassName.var = "var" setter ClassName.var getter
+
+see thing like export import and Promise.then or catch if needed!!!!
