@@ -1,0 +1,1 @@
+DEFINE API: use @Get/PUT/CREATE mapping to create a quazi API.. need the controller, DTOs and return something generic for now.. ResponseEntity.ok(dto)
