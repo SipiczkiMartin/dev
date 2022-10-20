@@ -1,0 +1,162 @@
+Controller ->@RestController
+            @RequiredArgsConstructor
+              @RequestMapping({"/api", "/api/v1"})
+            @Tag(name = "the Br Purpose API")
+            
+            private final BrPurposeService brPurposeService;
+    private final BusinessRelationshipPurposeMapper businessRelationshipPurposeMapper;
+
+    @Operation(summary = "Get br purpose info by BR ID", description = "Get br purpose info by BR ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation"),
+            @ApiResponse(responseCode = "404", description = "Not found", content = {@Content(
+                    mediaType = "application/json",
+                    array = @ArraySchema(schema = @Schema(implementation = ErrorDto.class)))
+            }),
+            @ApiResponse(responseCode = "424", description = "Failed dependency", content = {@Content(
+                    mediaType = "application/json",
+                    array = @ArraySchema(schema = @Schema(implementation = ErrorDto.class)))
+            })
+    })
+    @GetMapping(value = "/business-relationship/{br-uid}/br-purpose", produces = MediaType.APPLICATION_JSON_VALUE)
+    @AuthorizedEndpoint(roles = {"READ_BR_PURPOSE"})
+    public ResponseEntity<BrPurposeDto> getBrPurpose(@Parameter(description = "Br uid") @PathVariable("br-uid") UUID brId) {
+        var brPurpose = brPurposeService.getBrPurposeByBrUid(BusinessRelationPurposeUid.from(brId));
+        return brPurpose.map(
+                p -> ResponseEntity.ok(businessRelationshipPurposeMapper.map(p))
+        ).orElse(ResponseEntity.notFound().build());
+    }
+    
+service -> @Service
+          @RequiredArgsConstructor
+          
+           private final BusinessRelationPurposeRepository businessRelationPurposeRepository;
+    private final BrPurposeRelationMapper brPurposeRelationMapper;
+    private final EndClientInfoService endClientInfoService;
+
+    public Optional<BusinessRelationPurpose> getBrPurposeByBrUid(BusinessRelationPurposeUid brUid) {
+        return businessRelationPurposeRepository.findById(brUid.getId());
+    }
+
+    @Transactional
+    public BusinessRelationPurpose saveOrUpdateBrPurpose(BusinessRelationPurposeUid brUid, BusinessRelationPurpose brPurposeToSave) {
+        if (!brUid.isValid()) {
+            throw new IllegalArgumentException("BrUid " + brUid + " is not valid!");
+        }
+        var currentBrPurposeOpt = getBrPurposeByBrUid(brUid);
+        if (currentBrPurposeOpt.isPresent()){
+
+            var currentBrPurpose = currentBrPurposeOpt.get();
+            endClientInfoService.prepareForUpdate(brUid,currentBrPurpose,brPurposeToSave.getEndClientInfo());
+
+            return businessRelationPurposeRepository.save(currentBrPurpose);
+        }else{
+            //in case br purpose doesn't exist we'll create it
+            brPurposeToSave.setBusinessRelationPurposeId(brUid.getId());
+            brPurposeRelationMapper.mapRelations(brPurposeToSave);
+            return businessRelationPurposeRepository.save(brPurposeToSave);
+        }
+    }
+    
+repository -> @Repository
+public interface BusinessRelationPurposeRepository extends JpaRepository<BusinessRelationPurpose, UUID> {
+
+}
+
+mapper-> @Mapper(componentModel = "spring"
+        , unmappedTargetPolicy = ReportingPolicy.ERROR
+        , uses = {MetadataMapper.class}
+)
+public interface EndClientInfoMapper {
+    @Mapping(target = "metadata.version", source = "version")
+    @Mapping(target = "additionalInformation", source = "remark")
+    EndClientInfoDto map(EndClientInfo source);
+
+    @Mapping(target = "totalClientsPercentage", source = "percentage")
+    @Mapping(target = "clientsDomicile", source = "country")
+    ClientDomicilesDto map(ClientDomicile source);
+
+    @Mapping(target = "version", source = "metadata.version")
+    @Mapping(target = "remark", source = "additionalInformation")
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "modifiedBy", ignore = true)
+    @Mapping(target = "modifiedDate", ignore = true)
+    @Mapping(target = "businessRelationPurpose", ignore = true)
+    EndClientInfo map(EndClientInfoDto source);
+    
+    
+ entity ->@Entity
+@EntityListeners({AuditingEntityListener.class})
+@SuperBuilder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString
+@Audited
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+@Table(name = EndClientInfo.TABLE_NAME)
+public class EndClientInfo {
+    public static final String TABLE_NAME = "END_CLIENT_INFO";
+    public static final String COLUMN_VERSION = "VERSION";
+    public static final String COLUMN_MODIFIED_BY = "MODIFIED_BY";
+    public static final String COLUMN_MODIFIED_DATE = "MODIFIED_DATE";
+    public static final String COLUMN_NUMBER_OF_CLIENTS = "NUMBER_OF_CLIENTS";
+    public static final String COLUMN_SOURCE_OF_CLIENT = "SOURCE_OF_CLIENT";
+    public static final String COLUMN_REMARK = "REMARK";
+    public static final String COLUMN_BUSINESS_RELATION_PURPOSE_ID = "BUSINESS_RELATION_PURPOSE_ID";
+
+    @Id
+    @Builder.Default
+    @EqualsAndHashCode.Include
+    @Column(nullable = false, name = COLUMN_BUSINESS_RELATION_PURPOSE_ID)
+    private UUID id = UUID.randomUUID();
+
+    public EndClientInfoUid getEndClientInfoUid() {
+        return id == null ? null : EndClientInfoUid.from(id);
+    }
+
+    public void setEndClientInfoUid(EndClientInfoUid endClientInfoUid) {
+        id = endClientInfoUid.getId();
+    }
+
+    @Version
+    @Column(name = COLUMN_VERSION)
+    private Long version;
+
+    @LastModifiedBy
+    @Column(name = COLUMN_MODIFIED_BY)
+    private String modifiedBy;
+
+    @LastModifiedDate
+    @Column(name = COLUMN_MODIFIED_DATE)
+    private Instant modifiedDate;
+
+    @Column(name = COLUMN_NUMBER_OF_CLIENTS)
+    @Convert(converter = NumberOfClients.Converter.class)
+    private NumberOfClients numberOfClients;
+
+    @Column(name = COLUMN_SOURCE_OF_CLIENT, length = 500)
+    private String sourceOfClient;
+
+    @Column(name = COLUMN_REMARK, length = 500)
+    private String remark;
+
+    @OneToMany(mappedBy = "endClientInfo", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<ClientDomicile> clientDomiciles = new ArrayList<>();
+
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = COLUMN_BUSINESS_RELATION_PURPOSE_ID)
+    private BusinessRelationPurpose businessRelationPurpose;
+}
+
+database->datasource:
+    url: jdbc:h2:./test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;AUTO_SERVER=TRUE;MODE=Oracle;
+#    url: jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=Oracle;
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: sa
+    platform: h2
+    continue-on-error: true
